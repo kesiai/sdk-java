@@ -44,7 +44,11 @@ public abstract class AbstractDataSubscriber implements DataSubscriber {
         }
 
         try {
-            this.onSubscribes(this.subscriptions);
+            if(CollectionUtils.isEmpty(this.subscriptions)) {
+                logger.info("数据订阅: 订阅列表为空");
+            } else {
+                this.onSubscribes(this.subscriptions);
+            }
         } finally {
             lock.unlock();
         }
