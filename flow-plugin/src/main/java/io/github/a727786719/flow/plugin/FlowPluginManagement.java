@@ -69,6 +69,11 @@ public class FlowPluginManagement implements SmartLifecycle, FlowPluginClosedLis
         this.properties = properties;
         this.flowPluginService = flowPluginService;
         this.plugins = new ArrayList<>(plugins.size());
+        this.handlers = new ArrayList<>(plugins.size());
+
+        this.channel = ManagedChannelBuilder.forAddress(properties.getHost(), properties.getPort())
+                .usePlaintext()
+                .build();
 
         Map<String, Class<?>> pluginNames = new HashMap<>();
         for (FlowPlugin<Object> plugin : plugins) {
@@ -81,14 +86,11 @@ public class FlowPluginManagement implements SmartLifecycle, FlowPluginClosedLis
             }
 
             pluginNames.put(name, plugin.getClass());
-            this.plugins.add(new FlowPluginDelegate(plugin));
+            FlowPluginDelegate delegate = new FlowPluginDelegate(plugin);
+            FlowPluginHandler handler = new FlowPluginHandler(this.properties, this.channel, delegate, this);
+            this.plugins.add(delegate);
+            this.handlers.add(handler);
         }
-
-        this.handlers = new ArrayList<>(plugins.size());
-
-        this.channel = ManagedChannelBuilder.forAddress(properties.getHost(), properties.getPort())
-                .usePlaintext()
-                .build();
     }
 
     @Override
@@ -100,8 +102,6 @@ public class FlowPluginManagement implements SmartLifecycle, FlowPluginClosedLis
         // 执行各个插件的 onStart 方法
         for (FlowPluginDelegate plugin : this.plugins) {
             plugin.onStart();
-            FlowPluginHandler handler = new FlowPluginHandler(this.properties, this.channel, plugin, this);
-            this.handlers.add(handler);
         }
 
         this.startConnect();
@@ -163,6 +163,15 @@ public class FlowPluginManagement implements SmartLifecycle, FlowPluginClosedLis
             this.connectThread.interrupt();
         }
 
+        if (this.lastConnectTime != 0 && System.currentTimeMillis() - this.lastConnectTime < 5000) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(5000);
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
+        this.lastConnectTime = System.currentTimeMillis();
+
         this.connectThread = new Thread(this::connect, "Flow-Connector");
         this.connectThread.setDaemon(false);
         this.connectThread.start();
@@ -198,7 +207,7 @@ public class FlowPluginManagement implements SmartLifecycle, FlowPluginClosedLis
             }
 
             try {
-                TimeUnit.MICROSECONDS.sleep(retryInterval);
+                TimeUnit.MILLISECONDS.sleep(retryInterval);
             } catch (InterruptedException e) {
                 break;
             }

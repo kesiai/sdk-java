@@ -53,6 +53,11 @@ public class FlowExtensionManagement implements SmartLifecycle {
     private final ThreadPoolExecutor executor;
 
     /**
+     * 上次连接时间
+     */
+    private volatile long lastConnectTime = 0;
+
+    /**
      * 连接线程
      */
     private Thread connectThread;
@@ -164,6 +169,15 @@ public class FlowExtensionManagement implements SmartLifecycle {
             this.connectThread.interrupt();
         }
 
+        if (this.lastConnectTime != 0 && System.currentTimeMillis() - this.lastConnectTime < 5000) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(5000);
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
+        this.lastConnectTime = System.currentTimeMillis();
+
         this.connectThread = new Thread(this::connect, "Flow-Connector");
         this.connectThread.setDaemon(false);
         this.connectThread.start();
@@ -235,7 +249,7 @@ public class FlowExtensionManagement implements SmartLifecycle {
             }
 
             try {
-                TimeUnit.MICROSECONDS.sleep(retryInterval);
+                TimeUnit.MILLISECONDS.sleep(retryInterval);
             } catch (InterruptedException e) {
                 break;
             }

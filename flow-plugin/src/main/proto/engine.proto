@@ -19,9 +19,9 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 
-package engine;
+package flow;
 
-option go_package = "./engine;engine";
+option go_package = "./flow;flow";
 option java_package = "io.github.a727786719.flow.plugin";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
