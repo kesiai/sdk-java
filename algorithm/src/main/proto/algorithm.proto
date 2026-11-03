@@ -14,7 +14,7 @@ package algorithm;
 import "api.proto";
 
 option go_package = "./algorithm;algorithm";
-option java_package = "io.github.a727786719.algorithm.grpc.algorithm";
+option java_package = "com.kesiai.algorithm.grpc.algorithm";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 option java_generic_services = false;

@@ -1,0 +1,11 @@
+package com.kesiai.logger;
+
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportRuntimeHints;
+
+@Configuration
+@ImportRuntimeHints(GraalvmRuntimeHits.class)
+public class LoggerAutoConfiguration {
+
+}

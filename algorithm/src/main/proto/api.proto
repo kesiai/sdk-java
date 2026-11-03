@@ -7,8 +7,8 @@ syntax = "proto3";
 
 package api;
 
-option go_package = "github.com/a727786719/api-client-go/v4/api;api";
-option java_package = "io.github.a727786719.algorithm.grpc.api";
+option go_package = "github.com/kesiai/api-client-go/v4/api;api";
+option java_package = "com.kesiai.algorithm.grpc.api";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 option java_generic_services = true;
